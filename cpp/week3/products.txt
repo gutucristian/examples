@@ -1,0 +1,14 @@
+1	60	Amarone
+2	25	Ardanza
+10	15	Orin-swift-F
+20	10	Chardonnay
+21	12	Rioja
+22	14	Valpolicella
+23	8	Cabernet-estate
+24	10	Oyster
+25	10	Bodegas
+26	88	Antinori
+30	141	Caymus
+31	15	Godello
+32	899	Pauillac
+33	13	Chianti
