@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Foo</title>
+		<script defer src="./vue.js"></script>
+		<script defer src="./index.js"></script>
+	</head>
+
+	<body>
+		<div id="app">
+			<p>Visit my <a v-bind:href="link">blog</a></p>
+			<input type="text" v-on:input="changeTitle" v-bind:value="title">
+			<p>{{ title }}</p>
+			<button type="button" v-on:click="broadcastTitle()">Broadcast title!</button>
+			<hr>
+			<p v-html="builtInLink"></p>
+		</div>
+	</body>
+</html>
