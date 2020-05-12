@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Baz</title>
+    <script defer src="./vue.js"></script>
+    <script defer src="./index.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <h3>Using two way binding</h3>
+      <p>Two way binding with v-model</p>
+      <label for="name">Name</label>
+      <input id="name" type="text" v-model="name">
+      <span>({{ name }})</span>
+      <hr>
+      <h3>Using one way binding</h3>
+      <ol>
+        <li>bind input value attribute to name variable in data object</li>
+        <li>update name variable as user types by adding v-on:input event listener</li>
+      </ol>
+      <label for="name1">Name</label>
+      <input id="name1" type="text" v-bind:value="name" v-on:input="updateName">
+    </div>
+  </body>
+</html>
