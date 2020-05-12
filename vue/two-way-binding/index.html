@@ -19,7 +19,13 @@
         <li>update name variable as user types by adding v-on:input event listener</li>
       </ol>
       <label for="name1">Name</label>
-      <input id="name1" type="text" v-bind:value="name" v-on:input="updateName">
+      <input id="name1" type="text" :value="name" @input="updateName">
+      <!-- 
+       Below syntax achieves same as above but uses shorter syntax for the value
+       attribute binding and for the input event listener
+
+       <input id="name1" type="text" v-bind:value="name" v-on:input="updateName">
+      -->      
     </div>
   </body>
 </html>
