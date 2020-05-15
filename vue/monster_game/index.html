@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Monster Game</title>
+    <script defer src="vue.js"></script>
+    <script defer src="index.js"></script>
+    <link rel="stylesheet" type="text/css" href="index.css">
+  </head>
+  <body>
+    <div id="app">
+      <div class="container">
+        <div class="player">
+          <h1>You</h1>
+          <div class="health">
+            <div 
+              class="bar"
+              :style="{width: player.health + '%'}">{{ player.health }}</div>
+          </div>
+        </div>
+        <div class="player">
+          <h1>Monster</h1>
+          <div class="health">
+            <div 
+              class="bar" 
+              :style="{width: monster.health + '%'}">{{ monster.health }}</div>
+          </div>
+        </div>
+        <div class="break"></div>
+        <div class="cockpit">
+          <input 
+            type="button" 
+            value="Attack" 
+            class="attack"
+            @click="attack">
+          <input 
+            type="button"
+            value="Special Attack"
+            class="special-attack"
+            @click="attack(40)">
+          <input 
+            type="button" 
+            value="Heal" 
+            class="heal"
+            @click="heal">
+          <input type="button" value="Give Up" class="give-up">
+        </div>
+      </div>
+      <div class="break"></div>
+      <div class="log">
+        
+      </div>
+    </div>
+  </body>
+</html>
