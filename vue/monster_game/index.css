@@ -57,7 +57,8 @@
   width: 30%;
   height: 25px;
   background-color: #F7941E;
-  border-radius: 8px;  
+  border-radius: 8px;
+  transition: width 500ms;
 }
 
 .break {
