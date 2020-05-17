@@ -28,26 +28,37 @@
         <div class="break"></div>
         <div class="cockpit">
           <input 
-            type="button" 
-            value="Attack" 
-            class="attack"
-            @click="attack">
-          <input 
+            v-if="isGameOver"
             type="button"
-            value="Special Attack"
-            class="special-attack"
-            @click="attack(40)">
-          <input 
-            type="button" 
-            value="Heal" 
+            value="Play!"
             class="heal"
-            @click="heal">
-          <input type="button" value="Give Up" class="give-up">
+            @click="isGameOver = !isGameOver">
+          <template v-else>
+            <input 
+              type="button" 
+              value="Attack" 
+              class="attack"
+              @click="attack">
+            <input 
+              type="button"
+              value="Special Attack"
+              class="special-attack"
+              @click="attack(40)">
+            <input 
+              type="button" 
+              value="Heal" 
+              class="heal"
+              @click="heal">
+            <input type="button" value="Give Up" class="give-up">
+          </template>          
         </div>
-      </div>
-      <div class="break"></div>
-      <div class="log">
-        
+        <div class="break"></div>        
+        <div class="player">
+          <p v-for="hit in player.hits">{{ hit }}</p>
+        </div>
+        <div class="player">
+          <p v-for="hit in monster.hits">{{ hit }}</p>
+        </div>        
       </div>
     </div>
   </body>
