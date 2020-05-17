@@ -10,7 +10,7 @@
     <div id="app">
       <div class="container">
         <div class="player">
-          <h1>You</h1>
+          <h1>You</h1>          
           <div class="health">
             <div 
               class="bar"
@@ -27,37 +27,59 @@
         </div>
         <div class="break"></div>
         <div class="cockpit">
-          <input 
-            v-if="isGameOver"
+          <input
+            v-if="gameOver === true"
             type="button"
-            value="Play!"
+            :value="cockpitMessage"
             class="heal"
-            @click="isGameOver = !isGameOver">
+            @click="initGame">
           <template v-else>
             <input 
               type="button" 
               value="Attack" 
               class="attack"
-              @click="attack">
+              @click="attack(20, 20)">
             <input 
               type="button"
               value="Special Attack"
               class="special-attack"
-              @click="attack(40)">
+              @click="attack(50, 20)">
             <input 
               type="button" 
               value="Heal" 
               class="heal"
               @click="heal">
-            <input type="button" value="Give Up" class="give-up">
+            <input 
+              type="button" 
+              value="Give Up" 
+              class="give-up"
+              @click="initGame">
           </template>          
         </div>
         <div class="break"></div>        
         <div class="player">
-          <p v-for="hit in player.hits">{{ hit }}</p>
+          <table>
+            <tr>
+              <th>Round</th>
+              <th>Hit Damage</th>
+            </tr>
+            <tr v-for="(hit, i) in player.hits">
+              <td>{{ i }}</td>
+              <td>{{ hit }}</td>
+            </tr>
+          </table>
         </div>
         <div class="player">
-          <p v-for="hit in monster.hits">{{ hit }}</p>
+          <table>
+            <tr>
+              <th>Round</th>
+              <th>Hit Damage</th>
+            </tr>
+            <tr v-for="(hit, i) in monster.hits">
+              <td>{{ i }}</td>
+              <td>{{ hit }}</td>
+            </tr>
+          </table>
         </div>        
       </div>
     </div>
