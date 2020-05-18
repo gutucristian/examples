@@ -1,4 +1,4 @@
-new Vue({
+var vm1 = new Vue({
   el: '#app1',
   data: {
     title: 'The VueJS Instance',
@@ -25,9 +25,25 @@ new Vue({
   }
 });
 
-new Vue({
+setTimeout(function() {
+  /*
+    Notice how Vue proxies the instance's data and methods
+    so we can directly access them by name instead of through
+    the container objects themselves (e.g., Vue instance data,
+    methods).
+  */
+  vm1.title = 'Changed by timer!'
+}, 3000);
+
+var vm2 = new Vue({
   el: '#app2',
   data: {
     title: 'The second instance'
+  },
+  methods: {
+    onChange: function() {
+      // Vue proxies the instance's data here so we don't have to do vm1.data.title
+      vm1.title = 'Changed!';
+    }
   }
 });
