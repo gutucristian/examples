@@ -18,4 +18,9 @@ Vue instance options
 
 `computed`: dependent properties (used when calling a vue function in the template). This prevents the function from running needlessly if the data that it depends / uses is not modified in the app state (i.e., the vue instance `data` property).
 
-`watch`: execute code upon data changes. Name of variable in `watch` option must be the same as the variable it is "watching" from `data`. **Note**: much of what can be accoplished with `computed` can be done with `watch`, but using `computed` is recommended because of its caching mechanism. Also, functions in computed must be synchronous (e.g., no network requests).   
+`watch`: execute code upon data changes. Name of variable in `watch` option must be the same as the variable it is "watching" from `data`. **Note**: much of what can be accoplished with `computed` can be done with `watch`, but using `computed` is recommended because of its caching mechanism. Also, functions in computed must be synchronous (e.g., no network requests).
+
+Miscellaneous
+
+- There can be multiple Vue instances in an app
+- We can access Vue instance data and methods from outside the instance itself

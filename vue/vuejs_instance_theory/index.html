@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VueJS Instance Theory</title>
+    <script defer src="vue.js"></script>
+    <script defer src="index.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <h1>{{ title }}</h1>
+      <button @click="show">Show Paragraph</button>
+      <p v-if="showParagraph">This is not always visible</p>
+    </div>
+  </body>
+</html>
