@@ -22,5 +22,6 @@ Vue instance options
 
 Miscellaneous
 
-- There can be multiple Vue instances in an app
+- There can be multiple Vue instances in an app each controlling different things. E.g., we could use Vue to embed a reactive calendar widget in an older project (e.g., one that uses JSPs).
 - We can access Vue instance data and methods from outside the instance itself
+- There is a possibility to call methods and data from one Vue instance to another it is **recommended not to do this**
