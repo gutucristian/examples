@@ -1,9 +1,11 @@
+var data = {
+  title: 'The VueJS Instance',
+  showParagraph: false
+}
+
 var vm1 = new Vue({
   el: '#app1',
-  data: {
-    title: 'The VueJS Instance',
-    showParagraph: false
-  },
+  data: data,
   methods: {
     show: function() {
       this.showParagraph = true;
@@ -28,6 +30,13 @@ var vm1 = new Vue({
 vm1.newProp =  "Foobar!";
 
 console.log(vm1);
+console.log(vm1.$data);
+
+/*
+  proof that data in Vue instance is the data that we passed
+  in to the Vue constructor via the options object
+*/
+console.log(vm1.$data === data);
 
 setTimeout(function() {
   /*
