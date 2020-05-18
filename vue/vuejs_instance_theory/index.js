@@ -25,6 +25,10 @@ var vm1 = new Vue({
   }
 });
 
+vm1.newProp =  "Foobar!";
+
+console.log(vm1);
+
 setTimeout(function() {
   /*
     Notice how Vue proxies the instance's data and methods
@@ -33,6 +37,7 @@ setTimeout(function() {
     methods).
   */
   vm1.title = 'Changed by timer!'
+  vm1.show();
 }, 3000);
 
 var vm2 = new Vue({
