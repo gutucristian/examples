@@ -1,15 +1,17 @@
 var data = {
   title: 'The VueJS Instance',
-  showParagraph: false
+  showParagraph: false,
+  counter: 0
 }
 
 var vm1 = new Vue({
   el: '#app1',
-  data: data,
+  data: data,  
   methods: {
-    show: function() {
-      this.showParagraph = true;
-      this.updateTitle('The VueJS Instance (Updated)');
+    show: function() {      
+      this.showParagraph = !this.showParagraph;      
+      this.updateTitle(`The VueJS Instance (${this.counter})`);
+      this.counter++;
     },
     updateTitle: function(title) {
       this.title = title;
@@ -21,9 +23,9 @@ var vm1 = new Vue({
     }
   },
   watch: {
-    title: function(value) {
-      alert(`Title changed, new value: "${value}"`);
-    }
+    // title: function(value) {
+    //   alert(`Title changed, new value: "${value}"`);
+    // }
   }
 });
 
@@ -38,6 +40,23 @@ console.log(vm1.$data);
 */
 console.log(vm1.$data === data);
 
+console.log(vm1.$refs);
+console.log(vm1.$refs.myButton);
+
+/*
+  We can still manipulate an element by accessing it directly
+  in the DOM using Vue's ref, but any changes made might
+  be overwritten. In the example below we change the content of
+  the heading. Since the heading content is tied to the title variable
+  via interpolation what we set below will be overwritten when
+  title is updated.
+*/
+
+vm1.$refs.heading.childNodes[0].data = "Lalala";
+
+// this is wrong because it replaces the TextNode that Vue knows about with a new one -- essentially killing our binding
+// vm1.$refs.heading.innerText = "Lalala";
+
 setTimeout(function() {
   /*
     Notice how Vue proxies the instance's data and methods
@@ -45,8 +64,7 @@ setTimeout(function() {
     the container objects themselves (e.g., Vue instance data,
     methods).
   */
-  vm1.title = 'Changed by timer!'
-  vm1.show();
+  vm1.title = 'Changed by timer!';  
 }, 3000);
 
 var vm2 = new Vue({

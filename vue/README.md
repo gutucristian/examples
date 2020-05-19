@@ -27,3 +27,5 @@ Miscellaneous
 - There is a possibility to call methods and data from one Vue instance to another it is **recommended not to do this**
 
 When we create a new Vue instance, Vue requires an "options" object which we pass to its constructor. Behind the scenes, Vue "copies" this object and uses its data and methods as native properties on the Vue instance itself. It also sets up a "watcher" layer which watches each of the properties passed in the object so that it knows when they change. This is needed so that Vue knows when to update the app's state and possibly re-render the DOM. In the end, the Vue instance is a vanilla JavaScript object so we add properties to it even after we create the instance. **However** the instance will not recognize it and react to any references made to this new property because it **only creates the** previously mentioned **"watchers" once** -- when we pass the options object to the Vue instance constructor, any other property will be there, but it won't be under this "watcher" layer and won't have any getter and setters... thus rendering it unusable.
+
+`ref` is an attribute provided by Vue that we can place on any HTML element 
