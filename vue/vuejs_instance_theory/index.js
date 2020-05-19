@@ -5,7 +5,7 @@ var data = {
 }
 
 var vm1 = new Vue({
-  el: '#app1',
+  // el: '#app1',
   data: data,  
   methods: {
     show: function() {      
@@ -29,7 +29,11 @@ var vm1 = new Vue({
   }
 });
 
-vm1.newProp =  "Foobar!";
+
+
+vm1.$mount('#app1');
+
+vm1.newProp =  'Foobar!';
 
 console.log(vm1);
 console.log(vm1.$data);
@@ -79,3 +83,14 @@ var vm2 = new Vue({
     }
   }
 });
+
+var vm3 = new Vue({
+  template: '<h1>Hello!</h1>'
+});
+
+// vm3.$mount('#app3');
+
+// this will build our DOM based on the vm3 template
+vm3.$mount();
+// append vm3's compiled template (stored in the $el prop) to the app3 container
+document.getElementById('app3').appendChild(vm3.$el);
