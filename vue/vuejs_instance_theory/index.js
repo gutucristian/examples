@@ -4,6 +4,11 @@ var data = {
   counter: 0
 }
 
+// Simple Vue component
+Vue.component('hello', {
+  template: '<h1>Hello!</h1>'
+});
+
 var vm1 = new Vue({
   // el: '#app1',
   data: data,  
@@ -28,8 +33,6 @@ var vm1 = new Vue({
     // }
   }
 });
-
-
 
 vm1.$mount('#app1');
 
