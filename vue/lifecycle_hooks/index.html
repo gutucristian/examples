@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lifecycle Hooks</title>
+    <script defer src="./vue.js"></script>
+    <script defer src="./index.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <h1>{{ title }}</h1>
+      <button @click="title = 'Changed'">Update Title</button>
+      <button @click="destroy">Destroy</button>
+    </div>
+  </body>
+</html>
