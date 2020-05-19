@@ -45,3 +45,7 @@ There are two "versions" of VueJS:
 `Vue instance` <---WATCH---> `Virtual DOM` <---UPDATE---> `DOM`
 
 For each property in the `data` property Vue sets up a "watcher." However, Vue **does not** update the DOM directly and unconditionally when a data change is detected. This would be bad for atleast two reasons: (1) accessing the DOM is a slow operation and (2) what if the data "changed" to the same exact value that it had before (bad b/c this would trigger an unnecessary re-render on the DOM). So, Vue uses a "virtual DOM" to alleviate some of these problems. The virtual DOM is a representation of the DOM but in JavaScript (which tends to be faster). Vue watches for changes and updates the virtual DOM when one is made. Then it takes the difference between the new virtual DOM and the old one and only updates the actual DOM based on this difference.
+
+## Vue Instance Lifecycle
+
+![](images/vue_instance_lifecycle.png)
