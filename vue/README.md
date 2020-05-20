@@ -20,6 +20,18 @@ Vue instance options
 
 `watch`: execute code upon data changes. Name of variable in `watch` option must be the same as the variable it is "watching" from `data`. **Note**: much of what can be accoplished with `computed` can be done with `watch`, but using `computed` is recommended because of its caching mechanism. Also, functions in computed must be synchronous (e.g., no network requests).
 
+`render`: tells Vue to take the place in the DOM specified by the `el` property and don't infer the template from where it points to but **instead** override it with the template that we import and pass to the function which `render` returns to us (`h` in the example below). This function (`h`) takes a template to be rendered in the place of the selector defined in `el`:
+
+```
+import Vue from 'vue'
+import App from './App.vue' // our template
+
+new Vue({
+  el: '#app',
+  render: h => h(App)
+});
+```
+
 ## Miscellaneous
 
 There can be multiple Vue instances in an app each controlling different things. E.g., we could use Vue to embed a reactive calendar widget in an older project (e.g., one that uses JSPs).
