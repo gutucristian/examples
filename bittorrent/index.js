@@ -75,51 +75,82 @@ var options = {
 };
 
 http.get(options, function(resp){
-  let data = '';
+  let data = Buffer.alloc(0);
  
   // A chunk of data has been recieved.
   resp.on('data', (chunk) => {
-    data += chunk;
+    console.log("received chunk!")
+    console.log("data byte total = " + data.length)
+    console.log("received chunk byte total = " + chunk.length)
+    const byteTotal = chunk.length + data.length;
+    data = Buffer.concat([data, chunk], byteTotal)
+    console.log("new data byte total = " + data.length)
   });
 
   // The whole response has been received. Print out the result.
-  resp.on('end', () => {
-    // console.log(JSON.parse(data).explanation);
-    console.log('received entire response! see below:');
-    console.log(data);
+  resp.on('end', () => {      
+    
+    data = bencode.decode(data)
+    
+    console.log(data)
+
+    const dataByteTotal = data.length
+    const peersByteTotal = data.peers.length
+    console.log('received entire response!');
+    console.log('data byte total = ' + dataByteTotal);
+    console.log('data peers byte total = ' + peersByteTotal);
+
+    let peers = data.peers
+
+    let count = 0
+
+    while (count < peersByteTotal) {
+      let ip = []      
+      for (let i = 0; i < 4; i++) {
+        let part = peers.readUInt8(count)
+        ip.push(part)
+        count++
+      }    
+      let port = peers.readUInt16BE(count)
+      // let part = peers.readUInt16BE(count).toString(16)      
+      count+=2
+      console.log('ip: ' + ip.join('.') + `: ${port}`);
+    }
+
     // data = Buffer.from(data);
     // console.log(data)
-    let i = data.indexOf("peers");
-    while(true) {
-      if (data[i] === ":") break
-      i++
-    }
-    let peers = data.slice(++i)
-    peers = Buffer.from(peers)
-    console.log(peers)
+    // let i = data.indexOf("peers");
+    // while(true) {
+    //   if (data[i] === ":") break
+    //   i++
+    // }
+    // let peers = data.slice(++i, data.length - 1)
+    // peers = Buffer.from(peers)
+    // console.log("peers:" + peers)
+    // console.log('peers buffer length: ' + peers.length + ' bytes')
 
     // console.log(peers.readUInt8(0).toString('16')); // prints first byte value in hex
     // console.log(parseInt(peers.readUInt8(0), 10)); // prints first byte value in dec
     
-    console.log('peers buffer length: ' + peers.length + ' bytes')
 
-    let count = 0;
-    while (peers.length - count >= 6) {
-      let ip = [];
-      let port = [];
-      for (let i = 0; i < 4; i++) {
-        console.log("count = " + count)
-        let part = peers.readUInt8(count)
-        count++;
-        ip.push(parseInt(part, 10))
-      }
-      for (let i = 0; i < 2; i++) {
-        let part = peers.readUInt16LE(count)
-        port.push(parseInt(part, 10))
-        count+=2
-      }
-      console.log('ip: ' + ip.join('.') + `: ${port.join('')}`);
-    }
+    // let count = 0;
+    // while (peers.length - count >= 6) {
+    //   let ip = [];
+    //   let port = [];
+    //   for (let i = 0; i < 4; i++) {        
+    //     let part = peers.readUInt8(count)
+    //     // let part = peers.readUInt8(count).toString('16')
+    //     count++;                
+    //     ip.push(part)
+    //   }      
+    //   let part = peers.readUInt16BE(count)
+    //   // let part = peers.readUInt16BE(count).toString(16)
+    //   port.push(part)
+
+    //   count+=2
+      
+    //   console.log('ip: ' + ip.join('.') + `: ${port.join('')}`);
+    // }
 
   });
 }).on("error", function(e){
