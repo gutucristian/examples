@@ -1,5 +1,3 @@
-const { listenerCount } = require("process")
-
 treeData = {
     "name": "root",
     "children": [
