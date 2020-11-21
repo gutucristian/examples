@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+  <meta charset="utf-8">
+  <style type="text/css">
+    
+    body {
+      margin: 0;
+    }
+
+    .parent {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+    } 
+
+    .node {
+      cursor: pointer;
+    }
+
+    .overlay{
+        background-color:#EEE;
+    }
+    
+    .node circle {
+      fill: #fff;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+    }
+    
+    .node text {
+      font-size:10px; 
+      font-family:sans-serif;
+    }
+    
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+
+    .templink {
+      fill: none;
+      stroke: red;
+      stroke-width: 3px;
+    }
+
+    .ghostCircle.show{
+        display:block;
+    }
+
+    .ghostCircle, .activeDrag .ghostCircle{
+        display: none;
+    }
+
+    .left {
+      flex: 30;
+      background: green;
+    }
+
+    .left form {
+      padding: 15px;
+    }
+
+    .right {
+      flex: 70;
+      display: flex;
+      flex-direction: column;
+    }
+
+  </style>
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script defer src="generator.js"></script>
+  <script defer src="dndTree.js"></script>
+  <body>
+    <div class="parent">
+      <div class="left">
+        <form id="form" onsubmit="event.preventDefault(); visualize();">
+          <label>Input JSON</label>
+          <textarea name="jsonPayload" rows="40"></textarea>
+          <input type="submit" value="Visualize">
+        </form>
+      </div>
+      <div class="right" id="visualize-container"><div id="tree-container"></div></div>
+    </div>
+  </body>
+</html>
