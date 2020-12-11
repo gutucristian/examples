@@ -2,6 +2,16 @@ import json
 import json_flatten
 import sys
 import os
+from multiprocessing import Pool
+
+original_basepath = "original"
+new_basebath = "new"
+diff_basepath = "diff"
+custom_mappings: dict = {}
+    
+# custom_mappings = sys.argv[1]
+with open('./customMappings.json', 'r') as reader:
+    custom_mappings = json.loads(reader.read())
 
 def clean_empty(d):
     if not isinstance(d, (dict, list)):
@@ -30,7 +40,7 @@ def make_lowercase(obj):
         # anything else
         return obj
 
-def json_diff(left: dict, right: dict, custom_mappings: dict) -> dict:
+def json_diff(original_JSON_file:str) -> dict:
     '''
     Compute difference between left and right JSON objects
 
@@ -40,6 +50,24 @@ def json_diff(left: dict, right: dict, custom_mappings: dict) -> dict:
     :return difference between left and right JSON objects    
     :rtype: dict
     '''
+
+    print("Computing diff for: " + original_JSON_file)
+
+    left: dict = {}
+    
+    right: dict = {}
+
+    with open('{}/{}'.format(original_basepath, original_JSON_file), 'r') as f:
+        left = json.loads(f.read())
+
+    with open('{}/{}'.format(new_basebath, original_JSON_file), 'r') as f:
+        right = json.loads(f.read())
+
+    # pickup "PayLoad" section of left JSON for comparison
+    left: dict = left["PayLoad"]
+
+    # pickup "payLoad" section of right JSON for comparison
+    right: dict = right["eventMessage"]["eventAttributes"]["dataElements"]["payLoad"] 
 
     # print("Flattening 'left' JSON...")
     left_flattened = json_flatten.flatten(left)
@@ -113,7 +141,11 @@ def json_diff(left: dict, right: dict, custom_mappings: dict) -> dict:
             }
             found_diff = True
 
-    return diff, found_diff
+    if found_diff:
+        with open('{}/{}'.format(diff_basepath, original_JSON_file), 'w') as f:
+            f.write(json.dumps(diff, indent = 2))
+
+    # return diff, found_diff
 
 def handle_custom_mapping(k, custom_mapping_template) -> str:
     for key, val in custom_mapping_template.items():
@@ -123,74 +155,12 @@ def handle_custom_mapping(k, custom_mapping_template) -> str:
     return k
 
 if __name__ == "__main__":
-    args_len: int = len(sys.argv)
+    args_len: int = len(sys.argv)        
 
-    # if args_len < 3 or args_len > 4: 
-    #     sys.exit("usage: diff.py original_JSON new_JSON [custom_mappings_JSON]")
-
-    # left: str = sys.argv[1]
-    # right: str = sys.argv[2]
-    
-    custom_mappings: dict = {}
-
-    # if args_len == 4:
-    #     custom_mappings = sys.argv[3]
-    #     with open(custom_mappings, 'r') as reader:
-    #         custom_mappings: dict = json.loads(reader.read())
-
-    custom_mappings = sys.argv[1]
-    with open(custom_mappings, 'r') as reader:
-        custom_mappings: dict = json.loads(reader.read())
-
-    original_basepath = "original"
-    new_basebath = "new"
-    diff_basepath = "diff"
     original_JSON_files = os.listdir(original_basepath)
 
     count = 1
     l = len(original_JSON_files)
 
-    for original_JSON_file in original_JSON_files:
-        print("Computing diff for: " + original_JSON_file + " (" + str(count) + " of " + str(l) + ")")
-        count += 1
-
-        with open('{}/{}'.format(original_basepath, original_JSON_file), 'r') as f:
-            left = json.loads(f.read())
-    
-        with open('{}/{}'.format(new_basebath, original_JSON_file), 'r') as f:
-            right = json.loads(f.read())
-
-        # pickup "PayLoad" section of left JSON for comparison
-        left: dict = left["PayLoad"]
-
-        # pickup "payLoad" section of right JSON for comparison
-        right: dict = right["eventMessage"]["eventAttributes"]["dataElements"]["payLoad"] 
-        
-        diff, found_diff = json_diff(left, right, custom_mappings)
-
-        if found_diff:
-            with open('{}/{}'.format(diff_basepath, original_JSON_file), 'w') as f:
-                # if found_diff == True:
-                f.write(json.dumps(diff, indent = 2))
-                # else:
-                #     print("\tNo diff found for file: " + original_JSON_file)
-
-    # with open(left, 'r') as reader:
-    #     left = reader.read()
-
-    # with open(right, 'r') as reader:
-    #     right = reader.read()
-
-    # left: dict = json.loads(left)
-    # right: dict = json.loads(right)
-
-    # # pickup "PayLoad" section of left JSON for comparison
-    # left: dict = left["PayLoad"]
-
-    # # pickup "payLoad" section of right JSON for comparison
-    # right: dict = right["eventMessage"]["eventAttributes"]["dataElements"]["payLoad"]    
-
-    # diff: dict = json_diff(left, right, custom_mappings)
-
-    # print("Diff: ")
-    # print(json.dumps(diff, indent=2))
+    p = Pool(4)
+    p.map(json_diff, original_JSON_files)
