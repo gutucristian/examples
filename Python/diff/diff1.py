@@ -1,16 +1,26 @@
+import argparse
+import logging
 import json
 import json_flatten
 import sys
 import os
 from multiprocessing import Pool
 
-original_basepath = "original"
-new_basebath = "new"
-diff_basepath = "diff"
+# original_basepath = "original"
+# new_basebath = "new"
+# diff_basepath = "diff"
 custom_mappings: dict = {}
-    
+
+original_basepath = "C:\\Users\\x240801\\IdeaProjects\\cashvaluequoteavroevent\\target\\test-classes\\test\\data\\json\\input"
+new_basebath = "C:\\Users\\x240801\\IdeaProjects\\cashvaluequoteavroevent\\target\\test-classes\\test\\data\\json\\output"
+diff_basepath = "C:\\Users\\x240801\\scripts\\diffTool\\diff"
+custom_mappings_path = "C:\\Users\\x240801\\scripts\\diffTool"
+
 # custom_mappings = sys.argv[1]
-with open('./customMappings.json', 'r') as reader:
+
+os.chdir(custom_mappings_path)
+
+with open('./customMappingsCVQ.json', 'r') as reader:
     custom_mappings = json.loads(reader.read())
 
 def clean_empty(d):
@@ -57,8 +67,12 @@ def json_diff(original_JSON_file:str) -> dict:
     
     right: dict = {}
 
+    os.chdir(original_basepath)
+
     with open('{}/{}'.format(original_basepath, original_JSON_file), 'r') as f:
         left = json.loads(f.read())
+
+    os.chdir(new_basebath)
 
     with open('{}/{}'.format(new_basebath, original_JSON_file), 'r') as f:
         right = json.loads(f.read())
@@ -100,6 +114,10 @@ def json_diff(original_JSON_file:str) -> dict:
     and that their values correspond.
     '''
     for k, v in left_flattened.items():
+
+        if "fund.funddata" in k:
+            i = 5
+
         k = handle_custom_mapping(k, custom_mappings)
 
         path = ""
@@ -142,6 +160,7 @@ def json_diff(original_JSON_file:str) -> dict:
             found_diff = True
 
     if found_diff:
+        os.chdir(diff_basepath)
         with open('{}/{}'.format(diff_basepath, original_JSON_file), 'w') as f:
             f.write(json.dumps(diff, indent = 2))
 
@@ -155,12 +174,21 @@ def handle_custom_mapping(k, custom_mapping_template) -> str:
     return k
 
 if __name__ == "__main__":
-    args_len: int = len(sys.argv)        
+    # parser = argparse.ArgumentParser(description='Tool to compute difference between JSON payloads')
+    # parser.add_argument('-o', help='directory with original JSON payloads', required=True)
+    # parser.add_argument('-n', help='directory with new MSP JSON payloads', required=True)
+    # parser.add_argument('-c', help='directory of JSON file with custom mapping deffinitions')
+    # args = parser.parse_args()
 
-    original_JSON_files = os.listdir(original_basepath)
+    # print(args)
 
-    count = 1
-    l = len(original_JSON_files)
+    # if args_len < 3 or args_len > 4: 
+    #     sys.exit("usage: diff.py original_JSON new_JSON [custom_mappings_JSON]")
+
+    os.chdir(original_basepath)
+
+    # original_JSON_files = os.listdir(original_basepath)
+    original_JSON_files = os.listdir()    
 
     p = Pool(4)
     p.map(json_diff, original_JSON_files)
