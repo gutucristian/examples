@@ -16,6 +16,6 @@ commit_msg_filepath = sys.argv[1]
 branch = check_output(['git', 'symbolic-ref', '--short', 'HEAD']).strip()
 
 with open(commit_msg_filepath, 'r+') as f:
-	commit_msg = f.read();
-	f.seek(0, 0);
+	commit_msg = f.read()
+	f.seek(0, 0)
 	f.write("[{}]: {}".format(branch, commit_msg))

@@ -57,7 +57,9 @@ function visualize() {
 
     console.log(formData.get("jsonPayload"))
 
-    treeData = JSON.parse(formData.get("jsonPayload"))
+    rawJSON = JSON.parse(formData.get("jsonPayload"))
+
+    treeData = generate(null, rawJSON, true)
 
     // Calculate total nodes, max label length
   var totalNodes = 0;

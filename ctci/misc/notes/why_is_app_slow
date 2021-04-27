@@ -1,0 +1,12 @@
+Imagine a user calls you and complains about a slow application (that you maintain).
+What would you do to identify the problem?
+
+We break our debugging into the layers of the stack of our application. First, we can
+start with the front end and check if any of the APIs we are using are slow. We can
+also do some code profiling to see which part of our code is taking the longest to run
+to help us track potential issues in our logic. If the front-end is fine, we can look
+at the database to see what queries we are making and if they are fully optimized. Are
+we pulling unneeded information? If our back-end and front-end are fine then we can check
+to see how we are serving our page. Are we minifying the HTML/JS/CSS? Are we loading scripts
+before body? Lastly, maybe our app is not scalable. Maybe we need to scale it horizontally
+by adding a load balance with additional worker nodes.

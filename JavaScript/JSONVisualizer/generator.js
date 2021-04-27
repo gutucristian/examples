@@ -1,60 +1,60 @@
-// obj = {
-//   "foo1": "test",
-//   "abc": "sdfg",
-//   "bar": "rab",
-//   "PayLoad": {
-//     "NBHdr": {
-//       "lob": "asd",
-//       "poi": "zxc",
-//       "dudu": {
-//         "foobar": "poipoi",
-//         "pooi": {
-//           "asd": "xcv",
-//           "yellow": [
-//             {
-//               "scoop": "doo"
-//             },
-//             {
-//               "scoopfoop": "yuoo"
-//             }
-//           ]
-//         }
-//       }
-//     },
-//     "pooi": {
-//       "asd": "xcv",
-//       "yellow": [
-//         {
-//           "scoop": "doo"
-//         },
-//         {
-//           "scoopfoop": "yuoo"
-//         }
-//       ]
-//     },
-//     "googoo": "yooooooyo"
-//   }
-// }
+obj = {
+  "foo1": "test",
+  "abc": "sdfg",
+  "bar": "rab",
+  "PayLoad": {
+    "NBHdr": {
+      "lob": "asd",
+      "poi": "zxc",
+      "dudu": {
+        "foobar": "poipoi",
+        "pooi": {
+          "asd": "xcv",
+          "yellow": [
+            {
+              "scoop": "doo"
+            },
+            {
+              "scoopfoop": "yuoo"
+            }
+          ]
+        }
+      }
+    },
+    "pooi": {
+      "asd": "xcv",
+      "yellow": [
+        {
+          "scoop": "doo"
+        },
+        {
+          "scoopfoop": "yuoo"
+        }
+      ]
+    },
+    "googoo": "yooooooyo"
+  }
+}
 
-// treeData = {
-//   "name": "root",
-//   "children": [
-//     {
-//       "name": "foo",
-//       "children": [
-//         {
-//           "name": "doodoo"
-//         },
-//         {
-//           "name": "booboo"
-//         }
-//       ]
-//     },
-//     {
-//       "name": "bar"
-//     }
-//   ]
-// }
+treeData = {
+  "name": "root",
+  "children": [
+    {
+      "name": "foo",
+      "children": [
+        {
+          "name": "doodoo"
+        },
+        {
+          "name": "booboo"
+        }
+      ]
+    },
+    {
+      "name": "bar"
+    }
+  ]
+}
 
 function generate(result, data, start){
   if (start) {
