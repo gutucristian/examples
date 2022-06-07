@@ -1,0 +1,268 @@
+'use strict';
+
+var fs = require('fs');
+var http = require('http');
+var https = require('https');
+var path = require('path');
+var spawn = require('child_process').spawn;
+var convert = require('xml-js');
+var url = require('url');
+var util = require('util');
+const { program } = require('commander');
+
+process.env.AWS_PROFILE = "saml";
+
+const mavenFile = fs.readFileSync(path.join(__dirname, '.', 'pom.xml'), 'utf8');
+const mavenJson = JSON.parse(convert.xml2json(mavenFile, { compact: true }));
+const dependencyArray = mavenJson.project.dependencies.dependency;
+const propertyDict = Object.fromEntries(Object.entries(mavenJson.project.properties).map(([k, v]) => [`$\{${k}\}`, v._text]));
+
+// Read Java dependencies from pom.xml
+const MAVEN_PACKAGE_LIST = dependencyArray.map(
+  dep => getMavenPackageInfo(dep.groupId._text, dep.artifactId._text, propertyDict[dep.version._text] || dep.version._text)
+);
+
+var DEFAULT_JAR_PATH = path.resolve(path.join(__dirname, '..', 'lib', 'jars'));
+var MULTI_LANG_DAEMON_CLASS = 'software.amazon.kinesis.multilang.MultiLangDaemon';
+var MAX_HTTP_REDIRECT_FOLLOW = 3;
+
+function bootstrap() {
+  var args = parseArguments();
+  downloadMavenPackages(MAVEN_PACKAGE_LIST, args.jarPath, function (err) {
+    if (err) {
+      errorExit(util.format('Unable to download MultiLangDaemon jar files from maven: %s', err));
+    }
+    startKinesisClientLibraryApplication(args);
+  });
+}
+
+function createJavaHomeExecutablePath() {
+  return path.join(process.env.JAVA_HOME, 'bin', process.platform !== 'win32' ? 'java' : 'java.exe');
+}
+
+function parseArguments() {
+  program
+    .option('-p, --properties [properties file]', 'properties file with multi-language daemon options')
+    .option('-l, --log-configuration [logback.xml]', 'logback.xml to be used with MultiLangDaemon for logging (optional)')
+    .option('-j, --java [java path]', 'path to java executable - defaults to using JAVA_HOME environment variable to get java path (optional)')
+    .option('-c, --jar-path [jar path]', 'path where all multi-language daemon jar files will be downloaded (optional)')
+    .option('-e, --execute', 'execute the KCL application')
+    .parse(process.argv);
+  
+  const options = program.opts();
+  var args = {
+    'properties': options.properties,
+    'logConfiguration': options.logConfiguration ? options.logConfiguration : null,
+    'java': (options.java ? options.java : (process.env.JAVA_HOME ? createJavaHomeExecutablePath() : null)),
+    'jarPath': (options.jarPath ? options.jarPath : DEFAULT_JAR_PATH),
+    'execute': options.execute
+  };
+
+  if (!args.properties) {
+    invalidInvocationExit(program, 'Specify a valid --properties value.', true);
+  }
+  if (!isFile(args.properties)) {
+    invalidInvocationExit(program, args.properties + ' file does not exist. Specify a valid --properties value.', true);
+  }
+  if (!isFile(args.java)) {
+    invalidInvocationExit(program, 'Valid --java value is required or alternatively JAVA_HOME environment variable must be set.', true);
+  }
+  if (args.logCofiguration && !isFile(args.logConfiguration)) {
+    invalidInvocationExit(program, args.logConfiguration + ' file does not exists. Specify a valid --log-configuration value', true);
+  }
+  if (args.jarPath === DEFAULT_JAR_PATH) {
+    createDirectory(args.jarPath);
+  }
+  else if (!isDirectory(args.jarPath)) {
+    invalidInvocationExit(program, 'Path specified with --jar-path must already exist and must be a directory.', false);
+  }
+  return args;
+}
+
+function startKinesisClientLibraryApplication(options) {
+  var classpath = getClasspath(options).join(getPathDelimiter());
+  var java = options.java;
+  var logConfiguration = options.logConfiguration ? ['--log-configuration', options.logConfiguration] : [];
+  var args = ['-cp', classpath, MULTI_LANG_DAEMON_CLASS, '--properties-file', options.properties, ...logConfiguration];
+  var cmd = java + ' ' + args.join(' ');
+
+  console.log("==========================================================");
+  console.log(cmd);
+  console.log("==========================================================");
+  if (options.execute) {
+    console.log("Starting MultiLangDaemon ...");
+    spawn(java, args, { stdio: 'inherit' });
+  }
+}
+
+function getClasspath(options) {
+  var classpath = [];
+  fs.readdirSync(options.jarPath).map(function (file) {
+    return path.join(options.jarPath, file);
+  }).filter(function (file) {
+    return isFile(file);
+  }).forEach(function (file) {
+    classpath.push(path.resolve(file));
+  });
+  classpath.push(path.resolve('.'));
+  classpath.push(path.dirname(path.resolve(options.properties)));
+  return classpath;
+}
+
+function downloadMavenPackages(mavenPackages, destinationDirectory, callback) {
+  var remainingPackages = mavenPackages.length;
+  var callbackInvoked = false;
+
+  var downloadMavenPackageCallback = function (err, filePath) {
+    remainingPackages = remainingPackages - 1;
+    if (!callbackInvoked) {
+      if (!err) {
+        console.log(filePath + ' downloaded. ' + remainingPackages + ' files remain.');
+      }
+      if (err || remainingPackages === 0) {
+        callbackInvoked = true;
+        callback(err);
+        return;
+      }
+    }
+  };
+
+  for (var i = 0; i < mavenPackages.length; ++i) {
+    downloadMavenPackage(mavenPackages[i], destinationDirectory, downloadMavenPackageCallback);
+  }
+}
+
+function downloadMavenPackage(mavenPackage, destinationDirectory, callback) {
+  process.nextTick(function () {
+    var mavenPackageUrlInfo = getMavenPackageUrlInfo(mavenPackage);
+    var destinationFile = path.join(destinationDirectory, mavenPackageUrlInfo.fileName);
+    if (fs.existsSync(destinationFile)) {
+      callback(null, destinationFile);
+      return;
+    }
+    httpDownloadFile(mavenPackageUrlInfo.url, destinationFile, 0, callback);
+  });
+}
+
+function httpDownloadFile(requestUrl, destinationFile, redirectCount, callback) {
+  if (redirectCount >= MAX_HTTP_REDIRECT_FOLLOW) {
+    callback('Reached maximum redirects. ' + requestUrl + ' could not be downloaded.');
+    return;
+  }
+  var protocol = (url.parse(requestUrl).protocol === 'https:' ? https : http);
+  var options = {
+    hostname: url.parse(requestUrl).hostname,
+    path: url.parse(requestUrl).path,
+    agent: false
+  };
+  var request = protocol.get(options, function (response) {
+    // Non-2XX response.
+    if (response.statusCode > 300) {
+      if (response.statusCode > 300 && response.statusCode < 400 && response.headers.location) {
+        httpDownloadFile(response.headers.location, destinationFile, redirectCount + 1, callback);
+        return;
+      }
+      else {
+        callback(requestUrl + ' could not be downloaded: ' + response.statusCode);
+        return;
+      }
+    }
+    else {
+      var destinationFileStream = fs.createWriteStream(destinationFile);
+      response.pipe(destinationFileStream);
+
+      var callbackInvoked = false;
+      var destinationFileStreamFinishCallback = function () {
+        if (callbackInvoked) {
+          return;
+        }
+        callbackInvoked = true;
+        callback(null, destinationFile);
+      };
+      destinationFileStream.on('finish', destinationFileStreamFinishCallback);
+      // Older Node.js version may not support 'finish' event.
+      destinationFileStream.on('close', destinationFileStreamFinishCallback);
+    }
+  }).on('error', function (err) {
+    fs.unlink(destinationFile);
+    callback(err);
+  });
+}
+
+function getMavenPackageUrlInfo(mavenPackage) {
+  var urlParts = [];
+  var fileName = util.format('%s-%s.jar', mavenPackage.artifactId, mavenPackage.version);
+  mavenPackage.groupId.split('.').forEach(function (part) {
+    urlParts.push(part);
+  });
+  urlParts.push(mavenPackage.artifactId);
+  urlParts.push(mavenPackage.version);
+  urlParts.push(fileName);
+  return {
+    'url': "https://repo1.maven.org/maven2/" + urlParts.join('/'),
+    'fileName': fileName
+  };
+}
+
+function getMavenPackageInfo(groupId, artifactId, version) {
+  return {
+    'groupId': groupId,
+    'artifactId': artifactId,
+    'version': version
+  };
+}
+
+function isDirectory(path) {
+  try {
+    return fs.statSync(path).isDirectory();
+  } catch (e) {
+    // Path does not exist.
+    return false;
+  }
+}
+
+function createDirectory(path) {
+  try {
+    fs.mkdirSync(path);
+  } catch (e) {
+    if (e.code !== 'EEXIST') {
+      throw e;
+    }
+  }
+}
+
+function isFile(path) {
+  try {
+    return fs.statSync(path).isFile();
+  } catch (e) {
+    // Path does not exist.
+    return false;
+  }
+}
+
+function getPathDelimiter() {
+  if (path.delimiter) {
+    return path.delimiter;
+  }
+  // Older Node.js version may not support path.delimiter.
+  return (/^win/.test(process.platform) ? ';' : ':');
+}
+
+function invalidInvocationExit(prog, err, showHelp) {
+  console.error('');
+  console.error(util.format('ERROR: %s', err));
+  console.error('');
+  if (showHelp) {
+    prog.outputHelp();
+  }
+  process.exit(1);
+}
+
+function errorExit(err) {
+  console.error('');
+  console.error(util.format('ERROR: %s', err));
+  console.error('');
+  process.exit(1);
+}
+
+bootstrap();

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "aws-sdk": "^2.1128.0",
+    "commander": "^9.2.0",
+    "log4js": "^6.4.6",
+    "xml-js": "^1.6.11"
+  }
+}
