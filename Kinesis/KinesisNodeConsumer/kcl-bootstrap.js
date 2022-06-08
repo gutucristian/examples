@@ -10,7 +10,7 @@ var url = require('url');
 var util = require('util');
 const { program } = require('commander');
 
-process.env.AWS_PROFILE = "saml";
+// process.env.AWS_PROFILE = "saml";
 
 const mavenFile = fs.readFileSync(path.join(__dirname, '.', 'pom.xml'), 'utf8');
 const mavenJson = JSON.parse(convert.xml2json(mavenFile, { compact: true }));
@@ -22,7 +22,7 @@ const MAVEN_PACKAGE_LIST = dependencyArray.map(
   dep => getMavenPackageInfo(dep.groupId._text, dep.artifactId._text, propertyDict[dep.version._text] || dep.version._text)
 );
 
-var DEFAULT_JAR_PATH = path.resolve(path.join(__dirname, '..', 'lib', 'jars'));
+var DEFAULT_JAR_PATH = path.resolve(path.join(__dirname, '.', 'lib', 'jars'));
 var MULTI_LANG_DAEMON_CLASS = 'software.amazon.kinesis.multilang.MultiLangDaemon';
 var MAX_HTTP_REDIRECT_FOLLOW = 3;
 

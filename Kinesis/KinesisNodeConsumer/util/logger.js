@@ -2,14 +2,16 @@
 
 var log4js = require('log4js');
 
+
+
 function logger() {
-  var logDir = process.env.NODE_LOG_DIR !== undefined ? process.env.NODE_LOG_DIR : '.';
+  var logDir = process.env.NODE_LOG_DIR !== undefined ? process.env.NODE_LOG_DIR : './app-logs/';
 
   var config = {
     appenders: {
       default: {
         "type": "file",
-        "filename": logDir + "/" + process.pid + "application.log",
+        "filename": logDir + "/" + process.pid + ".application.log",
         "pattern": "-yyyy-MM-dd",
         "layout": {
           "type": "pattern",

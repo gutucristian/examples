@@ -181,3 +181,4 @@ Worker 2 will process shard 3 and 4 in parallel (will spawn a record processor f
 - https://docs.aws.amazon.com/streams/latest/dev/shared-throughput-kcl-consumers.html#shared-throughput-kcl-consumers-overview
 - https://docs.aws.amazon.com/streams/latest/dev/key-concepts.html
 - https://stackoverflow.com/questions/48399903/what-is-partition-key-in-aws-kinesis-all-about
+- https://stackoverflow.com/questions/49728807/trim-horizon-vs-latest

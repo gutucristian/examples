@@ -17,8 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class SDKPublisherLambdaApp implements RequestHandler<Map<String,String>, String> {
-    private final String STREAM_NAME = "foobar";
-
     private LambdaLogger logger;
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -30,22 +28,20 @@ public class SDKPublisherLambdaApp implements RequestHandler<Map<String,String>,
 
         logger = context.getLogger();
 
-        // log execution details
-        logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(System.getenv()));
-        logger.log("CONTEXT: " + gson.toJson(context));
+        // Log execution context
+        logger.log("Execution context: " + gson.toJson(context));
 
-        // process event
-        logger.log("EVENT: " + gson.toJson(event));
-        logger.log("EVENT TYPE: " + event.getClass());
+        // Log record to be published
+        logger.log("Publish record: " + gson.toJson(event));
 
         response = gson.toJson(publishEvent(event));
+
+        logger.log(gson.toJson(response));
 
         return response;
     }
 
     public Response publishEvent(Map<String,String> event) {
-        logger.log("Publish event: " + gson.toJson(event));
-
         // Service client for accessing Kinesis
         KinesisClient client = KinesisClient.builder().build();
 
@@ -58,7 +54,7 @@ public class SDKPublisherLambdaApp implements RequestHandler<Map<String,String>,
         // Represents the input for PutRecord
         PutRecordRequest.Builder builder = PutRecordRequest.builder()
                 .partitionKey(partitionKey)
-                .streamName(STREAM_NAME)
+                .streamName(Utils.STREAM_NAME)
                 .data(SdkBytes.fromByteArray(data));
 
         // Build put record request
@@ -73,19 +69,16 @@ public class SDKPublisherLambdaApp implements RequestHandler<Map<String,String>,
             response = new Response(
                     "Published record to stream",
                     putRecordResponse.sequenceNumber(),
-                    putRecordResponse.shardId(), STREAM_NAME
+                    putRecordResponse.shardId(),
+                    Utils.STREAM_NAME
             );
-
-            return response;
         } catch (KinesisException e) {
             response = new Response("Event could not be published: " + e.getMessage(),
                     null,
                     null,
-                    STREAM_NAME
+                    Utils.STREAM_NAME
             );
         }
-
-        logger.log(gson.toJson(response));
 
         return response;
     }

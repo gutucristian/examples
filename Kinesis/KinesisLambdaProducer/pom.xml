@@ -5,37 +5,45 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>awk-kpl-lambda</artifactId>
+    <artifactId>aws-kinesis-producer-lambda</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 
     <build>
+        <finalName>aws-kinesis-producer-lambda</finalName>
         <plugins>
-            <!--The Compiler Plugin is used to compile the sources of your project-->
+            <!--This plugin provides the capability to package the artifact in an uber-jar, including its dependencies-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <!--This plugin provides the capability to package the artifact in an uber-jar, including its dependencies and to shade - i.e. rename - the packages of some of the dependencies.-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.2</version>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                </configuration>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <!--Use jar-with-dependencies as the descriptorRef of your assembly-plugin configuration in order to create a JAR which contains the binary output of your project, along its the unpacked dependencies-->
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <index>true</index>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>producer.SDKPublisherLambdaApp</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -46,26 +54,12 @@
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.2.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
-        </dependency>
 
+        <!--KPL-->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>amazon-kinesis-producer</artifactId>
             <version>0.14.12</version>
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>commons-io</groupId>-->
-<!--                    <artifactId>commons-io</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.json</groupId>-->
-<!--                    <artifactId>json</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
         </dependency>
 
         <dependency>
@@ -74,13 +68,21 @@
             <version>1.7.21</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
+        </dependency>
+
         <!--For SDKPublisherLambdaApp-->
+
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-kinesis -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-kinesis</artifactId>
             <version>1.12.228</version>
         </dependency>
+
         <dependency>
             <groupId>software.amazon.kinesis</groupId>
             <artifactId>amazon-kinesis-client</artifactId>
